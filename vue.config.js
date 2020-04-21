@@ -11,5 +11,16 @@ module.exports = {
   },
   "transpileDependencies": [
     "vuetify"
-  ]
+  ],
+/* non funziona, non usato...
+  css: {
+    loaderOptions: {
+      sass: {
+        sassOptions: {
+          data: `@import "@/styles/style.scss";`
+        }
+      }
+    }
+  }
+*/
 }

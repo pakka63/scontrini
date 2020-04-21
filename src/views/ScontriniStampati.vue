@@ -13,35 +13,28 @@
         :loading="loading"
         loading-text="Lettura dati... Attendere"
         :footer-props="footerProps"
-        sort-by="created_at"
+        sort-by="updated_at"
+        sort-desc
         @item-selected="itemSelected"
         @toggle-select-all="itemSelectAll"
+
       >
-        <template #item.prezzo="{ value }">{{ value | toEuro }}</template>
+        <template #no-data>
+          <v-alert class="font-weight-regular" :value="true" color="blue-grey" dark dense >Nessun Dato disponibile</v-alert>
+        </template>
+        <template #item.updated_at="{ value }">{{ value | toGMA }}</template>
         <template #item.created_at="{ value }">{{ value | toGMA }}</template>
         <template #item.errore="{ value }"><span class="red--text darken-3">{{ value }}</span></template>
-        <template #no-data>
-          <v-alert 
-            class="font-weight-regular"
-            :value="true" color="blue-grey" dark dense
-          >Nessun Dato disponibile
-        </v-alert>
-        </template>
-        <template #footer><div style="height:0"><v-btn :disabled="btnDisabled" class="pa-3 ml-5 mt-3 primary">Stampa Scontrini</v-btn></div></template>
+        <template #footer><div style="height:0"><v-btn :disabled="btnDisabled" class="pa-3 ml-5 mt-3 primary">Invia a SAP</v-btn></div></template>
       </v-data-table>
     </div>
 </template>
 
 <script>
-// @ is an alias to /src
-//import HelloWorld from '@/components/HelloWorld.vue'
 import axios from 'axios';
 
 export default {
-  name: 'ScontriniNuovi',
-  components: {
-//    HelloWorld
-  },
+  name: 'ScontriniStampati',
   data() {
     return {
       loading: true,
@@ -54,20 +47,22 @@ export default {
   computed : {
     headers() {
       return [
-        { text: 'Documento', value: 'id_documento'},
-        { text: 'Testo', value: 'testo'},
-        { text: 'Prezzo €', value: 'prezzo', align: 'end'},
-        { text: 'Ricevuto', value: 'created_at', align : 'center'},
+        { text: 'Documento', value: 'id_documento' },
+        { text: 'Testo', value: 'testo' },
+        { text: 'Prezzo €', value: 'prezzo', align: 'end' },
+        { text: 'Stampato', value: 'updated_at', align : 'center' },
+        { text: 'Ricevuto', value: 'created_at', align : 'center' },
         { text: 'Anomalie', value: 'errore'},
       ]
     },
+
     footerProps() {
       return {
         itemsPerPageOptions: [20,50,-1],
         itemsPerPageText: "Righe per pagina:",
         itemsPerPageAllText: "Tutte",
         pageText: "{0}-{1} di {2}"
-      }
+      };
     }
   },
 
@@ -89,13 +84,13 @@ export default {
       }
     },
     itemSelectAll(chk) {
-        this.btnDisabled = !chk.value;
+      this.btnDisabled = !chk.value;
     }
-
   },
 
   created() {
-    this.getPosts('scontriniNuovi');
+    this.getPosts('scontriniStampati');
   }
+
 }
 </script>

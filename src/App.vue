@@ -6,54 +6,49 @@
       dark
     >
       <div class="d-flex align-center">
-        <v-img
-          alt="Vuetify Logo"
-          class="shrink mr-2"
-          contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
-          transition="scale-transition"
-          width="40"
-        />
-
-        <v-img
-          alt="Vuetify Name"
-          class="shrink mt-1 hidden-sm-and-down"
-          contain
-          min-width="100"
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
-          width="100"
-        />
+        <v-toolbar-title class="display-1">
+        <v-icon class="mr-2" x-large>mdi-cash-register</v-icon>
+          {{ title }}</v-toolbar-title>
       </div>
 
       <v-spacer></v-spacer>
-      <v-btn text active to="/">Nuovi</v-btn>
-      <v-btn text to="/stampati">Stampati</v-btn> 
-      <v-btn text to="/about">About</v-btn>
-      <v-btn
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
-        text
-      >
-        <span class="mr-2">Latest Release</span>
-        <v-icon>mdi-open-in-new</v-icon>
-      </v-btn>
+      <v-btn text class="mr-2" active to="/">Nuovi</v-btn>
+      <v-btn text class="mr-2" to="/stampati">Stampati</v-btn> 
+      <v-btn text to="/storico">Storico</v-btn>
     </v-app-bar>
 
     <v-content>
       <router-view/>
     </v-content>
+    <v-footer padless >
+    <v-col
+      class="text-center"
+      cols="12"
+    >
+      {{ new Date().getFullYear() }} — <strong>EDP Progetti S.r.l.</strong>
+    </v-col>
+  </v-footer>
   </v-app>
 </template>
 
 <script>
-
 export default {
   name: 'App',
-  created() {
-    //  console.log("Created", process.env);
-  },
   data: () => ({
+    title: process.env.VUE_APP_TITLE
     //
   }),
 };
 </script>
+
+<style>
+  .v-data-footer {
+    margin-right: 0 !important;
+    background-color: var(--v-accent-lighten2);
+  }
+  tr.v-data-table__empty-wrapper td {
+    font-weight: bolder;
+    color: #000;
+    padding-top: 20px;
+}
+</style>

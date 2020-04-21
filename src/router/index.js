@@ -11,13 +11,21 @@ Vue.use(VueRouter)
     component: ScontriniNuovi
   },
   {
-    path: '/about',
-    name: 'About',
+    path: '/stampati',
+    name: 'Stampati',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
-  }
+    component: () => import(/* webpackChunkName: "stampati" */ '../views/ScontriniStampati.vue')
+  },
+  {
+      path: '/storico',
+      name: 'Storico',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "storico" */ '../views/ScontriniInviati.vue')
+  },
 ]
 
 const router = new VueRouter({
