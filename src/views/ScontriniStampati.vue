@@ -13,34 +13,53 @@
         :loading="loading"
         loading-text="Lettura dati... Attendere"
         :footer-props="footerProps"
+        :itemsPerPage="itemsPerPage"
+        :page="page"
         sort-by="updated_at"
         sort-desc
         @item-selected="itemSelected"
         @toggle-select-all="itemSelectAll"
+        @pagination="checkPagination"
 
       >
         <template #no-data>
           <v-alert class="font-weight-regular" :value="true" color="blue-grey" dark dense >Nessun Dato disponibile</v-alert>
         </template>
+        <template #item.prezzo="{ value }">{{ value | toEuro }}</template>
         <template #item.updated_at="{ value }">{{ value | toGMA }}</template>
         <template #item.created_at="{ value }">{{ value | toGMA }}</template>
         <template #item.errore="{ value }"><span class="red--text darken-3">{{ value }}</span></template>
-        <template #footer><div style="height:0"><v-btn :disabled="btnDisabled" class="pa-3 ml-5 mt-3 primary">Invia a SAP</v-btn></div></template>
+        <template #footer>
+          <div style="height:0">
+            <v-btn :disabled="btnDisabled" class="pa-3 ml-5 mt-3 primary">Invia a SAP</v-btn>
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on }">
+                  <v-btn class="mt-3 ml-5" outlined v-on="on" color="primary" @click="reload">
+                    <v-icon>mdi-refresh</v-icon>
+                </v-btn>
+              </template>
+              <span>Rileggi i dati</span>
+            </v-tooltip>
+          </div>
+        </template>
       </v-data-table>
     </div>
 </template>
 
 <script>
 import axios from 'axios';
+import { stampati } from '@/store.js';
 
 export default {
   name: 'ScontriniStampati',
   data() {
     return {
       loading: true,
-      rows: [],
+      rows: stampati.scontrini,
       selected: [],
       btnDisabled: true,
+      itemsPerPage: stampati.itemsPerPage,
+      page: stampati.currentPage,
     }
   },
 
@@ -67,13 +86,19 @@ export default {
   },
 
   methods: {
-    getPosts(section) {
-      axios.get(section)
-        .then(res => {
-          this.rows=res.data;
-          this.loading=false;
-        })
-        .catch(error => console.log(error))
+    getPosts() {
+      this.loading = (this.rows.length == 0);
+      if(this.rows.length == 0) {
+        axios.get('scontriniStampati')
+          .then(res => {
+            this.rows = stampati.scontrini=res.data;
+            this.loading=false;
+          })
+          .catch(error => console.log(error))
+      } else {
+        this.itemsPerPage = stampati.itemsPerPage;
+        this.page = stampati.currentPage;
+      }
     },
     itemSelected(chk) {
       if(chk.value) {
@@ -85,11 +110,19 @@ export default {
     },
     itemSelectAll(chk) {
       this.btnDisabled = !chk.value;
-    }
+    },
+    checkPagination(info) {
+      stampati.itemsPerPage = info.itemsPerPage;
+      stampati.currentPage = info.page;
+    },
+    reload() {
+      this.rows = [];
+      this.getPosts();
+    },
   },
 
   created() {
-    this.getPosts('scontriniStampati');
+    this.getPosts();
   }
 
 }

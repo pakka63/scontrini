@@ -13,9 +13,12 @@
         :loading="loading"
         loading-text="Lettura dati... Attendere"
         :footer-props="footerProps"
+        :itemsPerPage="itemsPerPage"
+        :page="page"
         sort-by="created_at"
         @item-selected="itemSelected"
         @toggle-select-all="itemSelectAll"
+        @pagination="checkPagination"
       >
         <template #item.prezzo="{ value }">{{ value | toEuro }}</template>
         <template #item.created_at="{ value }">{{ value | toGMA }}</template>
@@ -27,7 +30,18 @@
           >Nessun Dato disponibile
         </v-alert>
         </template>
-        <template #footer><div style="height:0"><v-btn :disabled="btnDisabled" class="pa-3 ml-5 mt-3 primary">Stampa Scontrini</v-btn></div></template>
+        <template #footer>
+          <div style="height:0"><v-btn :disabled="btnDisabled" class="pa-3 ml-5 mt-3 primary" @click="stampaScontrini">Stampa Scontrini</v-btn>
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on }">
+                  <v-btn class="mt-3 ml-5" outlined v-on="on" color="primary" @click="reload">
+                    <v-icon>mdi-refresh</v-icon>
+                </v-btn>
+              </template>
+              <span>Rileggi i dati</span>
+            </v-tooltip>
+          </div>
+        </template>
       </v-data-table>
     </div>
 </template>
@@ -36,22 +50,35 @@
 // @ is an alias to /src
 //import HelloWorld from '@/components/HelloWorld.vue'
 import axios from 'axios';
+import { nuovi } from '@/store.js';
+
+function isElectron() {
+  return (typeof process !== "undefined") && process.versions && (process.versions.electron !== undefined);
+}
+let ipcRenderer = null;
+if(isElectron()) {
+  const electron = require('electron');
+  ipcRenderer = electron.ipcRenderer;
+//  import { ipcRenderer } from 'electron';
+}
 
 export default {
   name: 'ScontriniNuovi',
-  components: {
-//    HelloWorld
-  },
   data() {
     return {
       loading: true,
-      rows: [],
+      rows: nuovi.scontrini,
       selected: [],
-      btnDisabled: true,
+      btnStampaDisabled: true,
+      itemsPerPage: nuovi.itemsPerPage,
+      page: nuovi.currentPage,
     }
   },
 
   computed : {
+    btnDisabled() {
+      return  !isElectron() || this.btnStampaDisabled;
+    },
     headers() {
       return [
         { text: 'Documento', value: 'id_documento'},
@@ -72,30 +99,56 @@ export default {
   },
 
   methods: {
-    getPosts(section) {
-      axios.get(section)
-        .then(res => {
-          this.rows=res.data;
-          this.loading=false;
-        })
-        .catch(error => console.log(error))
+    getPosts() {
+      this.loading = (this.rows.length == 0);
+      if(this.rows.length == 0) {
+        axios.get('scontriniNuovi')
+          .then(res => {
+            this.rows = nuovi.scontrini = res.data;
+            this.loading=false;
+          })
+          .catch(error => console.log(error))
+      } else {
+        this.itemsPerPage = nuovi.itemsPerPage;
+        this.page = nuovi.currentPage;
+      }
     },
     itemSelected(chk) {
       if(chk.value) {
-        this.btnDisabled = false;
+        this.btnStampaDisabled = false;
       } else {
         // é stato disattivato il checkbox, se non ci sono altre row, disattivo il bottone
-        this.btnDisabled = this.selected.length < 2;
+        this.btnStampaDisabled = this.selected.length < 2;
       }
     },
     itemSelectAll(chk) {
-        this.btnDisabled = !chk.value;
+      this.btnStampaDisabled = !chk.value;
+    },
+    checkPagination(info) {
+      nuovi.itemsPerPage = info.itemsPerPage;
+      nuovi.currentPage = info.page;
+    },
+    reload() {
+      this.rows = [];
+      this.getPosts();
+    },
+    stampaScontrini() {
+      ipcRenderer.send('stampaScontrini', this.selected);
     }
-
   },
 
   created() {
-    this.getPosts('scontriniNuovi');
+    this.getPosts();
+    if(isElectron()) {
+      ipcRenderer.on('esitoStampa', (/* event, arg */) => {
+        this.reload();
+      });
+    }
+  },
+  beforeDestroy() {
+    if(isElectron()) {
+      ipcRenderer.removeAllListeners('esitoStampa');
+    }
   }
 }
 </script>

@@ -1,10 +1,36 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import {
   createProtocol,
 //  installVueDevtools
 } from 'vue-cli-plugin-electron-builder/lib'
+
+const fs = require('fs')
+const path = require('path')
+const stampaSc = require('@/utils/stampaScontrini')
+
+const confFile = process.cwd() + path.sep +'config.json'
+console.log(confFile)
+try {
+    if (!fs.existsSync(confFile)) {
+      const content = 
+      `{
+        "server" : {
+          "address" : "10.197.154.208",
+          "port" : 9100
+        }
+      }`;
+      const data = fs.writeFileSync(confFile, content)
+      //file written successfully
+    }
+    var config = JSON.parse(fs.readFileSync(confFile, 'utf8'));
+} catch(err) {
+    console.log('ERRORE in lettura di "' + confFile + '":' + "\n     " + err);
+    process.exit(1);
+} 
+
+
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 //console.log(process.env);
@@ -19,11 +45,12 @@ protocol.registerSchemesAsPrivileged([{scheme: 'app', privileges: { secure: true
 function createWindow () {
   // Create the browser window.
   win = new BrowserWindow({ 
-    width: 1300, height: 810,
+    width: 1300, height: 755,
     webPreferences: {
       nodeIntegration: true
     }
   })
+  win.removeMenu()
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
@@ -39,6 +66,23 @@ function createWindow () {
     win = null
   })
 }
+
+//===================================================================================
+
+ipcMain.on('stampaScontrini', (event, arg) => {
+  console.log(arg)
+  let scontrini = arg.map( a => {
+    return {
+      id: a['id'],
+      testo: a['testo'],
+      id_documento: a['id_documento'],
+      prezzo: a['prezzo']
+    }
+  })
+  stampaSc.emettiScontrini(config.server, scontrini)
+  event.reply('esitoStampa', 'Fatto!')
+})
+
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {

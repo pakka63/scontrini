@@ -18,7 +18,9 @@
     </v-app-bar>
 
     <v-content>
-      <router-view/>
+      <transition name="slide-appear" mode="out-in">
+        <router-view/>
+      </transition>
     </v-content>
     <v-footer padless >
     <v-col
@@ -50,5 +52,13 @@ export default {
     font-weight: bolder;
     color: #000;
     padding-top: 20px;
-}
+  }
+  .slide-appear-enter { opacity: 0; width:100%; }
+  .slide-appear-enter-to { opacity: 1; width:100%; }
+
+  .slide-appear-leave { transform: translateX(0);}
+  .slide-appear-leave-to { transform: translateX(-100%);}
+  
+  .slide-appear-enter-active { transition: all 200ms}
+  .slide-appear-leave-active { transition: all 400ms}
 </style>
