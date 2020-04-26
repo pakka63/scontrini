@@ -79,8 +79,7 @@ ipcMain.on('stampaScontrini', (event, arg) => {
       prezzo: a['prezzo']
     }
   })
-  stampaSc.emettiScontrini(config.server, scontrini)
-  event.reply('esitoStampa', 'Fatto!')
+  stampaSc.emettiScontrini(config.server, scontrini, event)
 })
 
 

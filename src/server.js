@@ -1,15 +1,30 @@
-/* programma di test per simulare la stampante XCUBE */
 const net = require('net');
 
 const server = net.createServer((socket) => {
-    socket.end('goodbye\n');
-  }).on('error', (err) => {
-    // Handle errors here.
-    throw err;
+  let closing = false;
+  // 'connection' listener.
+  console.log('client connected from ' + socket.remoteAddress + ':' + socket.remotePort);
+  socket.on('end', () => {
+    console.log('client disconnected');
   });
-  
-  // Grab an arbitrary unused port.
-  server.listen(() => {
-    console.log('opened server on', server.address());
+  socket.on('data', (buff) => {
+    console.log('data:[' + buff.toString() + ']', buff[0]);
+    if(closing==false) {
+      if(buff[0] == 3) {
+        console.log('closing...');
+        closing=true;
+        socket.end('bye');
+      } else {
+        socket.write('data:[' + buff + ']\r\n');
+      }
+    }
+    
   });
-  
+  socket.write('hello\r\n');
+});
+server.on('error', (err) => {
+  console.log(err) ;
+});
+server.listen(3500, () => {
+  console.log('server in ascolto su ', server.address());
+});
