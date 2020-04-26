@@ -10,10 +10,10 @@ const nACK = 6;
 const sNAK = '\x15';
 const nNAK = 21;
 
-var counter = -1;
-var dataBuff = Buffer.alloc(0);
 
 function emettiScontrini(server, lista, evt) {
+  let dataBuff = Buffer.alloc(0);
+  let counter = -1;
   let msgErrore = '';
   let idxScontrino; // stato comunicazione con la cassa: -1 info, 0-n emisione scontrino.
 
@@ -34,15 +34,12 @@ function emettiScontrini(server, lista, evt) {
   }
 
   function faiCKS(str) {
-    let result = 0, l =str.lenght;
-    while(l >= 0) {
+    let result = 0, l = str.length;
+    while(l > 0) {
       result += str.charCodeAt(--l);
     }
     result %= 100;
-    if(result > 9) {
-      return result.toString();
-    }
-    return '0' + result.toString();
+    return result.toString().padStart(2,'0');
   }
 
   function decodeResponse(buffer) {
@@ -57,7 +54,7 @@ function emettiScontrini(server, lista, evt) {
       msgErrore = 'KO secondo carattere non è STX:' + buffer[1].toString();
       return false;
     }
-    let csum = buffer.toString('ascii', ll-2, ll-1);
+    let csum = buffer.toString('ascii', ll-3, ll-1);
     let cks = faiCKS(buffer.toString('ascii',2, ll-3));
     if(csum != cks) {
       msgErrore = 'KO checksum errato:' + csum + '-' + cks;
@@ -69,7 +66,7 @@ function emettiScontrini(server, lista, evt) {
     return buffer.toString('ascii', 5, ll -3);
   }
 
-  function isPrinterOK(txt) {}
+  function isPrinterOK(txt) {
     if(txt.charAt(0) == '1') {
       msgErrore = 'KO coperchio aperto, verificare';
       return false;
@@ -100,11 +97,16 @@ function emettiScontrini(server, lista, evt) {
 
   function inviaScontrino(idx) {
     let descr = (listaScontrini[idx].testo).substr(0,22);
-    let ll = (descr.lenght).toString().padStart(2,'0');
-    let price = (listaScontrini[idx].prezzo * 100).toString().padStart(9,'0');
+    let ll = (descr.length).toString().padStart(2,'0');
+    let price = Math.round(listaScontrini[idx].prezzo * 100).toString().padStart(9,'0');
     let str = '30011' + ll + descr + price;
     sendCassa(str);
   }
+
+  function  aggiornaScontrino(idx,txt) {
+    console.log('Aggiorno scontrino ' + idx + ',' + txt);
+    return true;
+  } 
 
   client.on('data', (buffer) =>{
     if(buffer[0] == nNAK) {
@@ -136,6 +138,7 @@ function emettiScontrini(server, lista, evt) {
     }
 
     // Analisi del messagio tornato dalla stampante e conseguente azione successiva
+    console.log('Rx=[' + txt + ']');
     switch (txt.substr(0,4)) {
       case '1109': // check Stampante
         if (!isPrinterOK(txt.substr(4))) {
@@ -147,13 +150,13 @@ function emettiScontrini(server, lista, evt) {
         break;
 
       case '3001': // operazione fiscale
-        sendcassa('3011');
+        sendCassa('3011');
         break;
       case '3011': // chiusura scontrino
-        sendcassa('3013');
+        sendCassa('3013');
         break;
       case '3013': // Espulsione e taglio scontrino
-        sendcassa('1008');
+        sendCassa('1008');
         break;
 /*        Non si inviano....
       case '1003': // ricezione totale scontrino
@@ -168,13 +171,15 @@ function emettiScontrini(server, lista, evt) {
         }
         if(++idxScontrino < listaScontrini.length) {
           inviaScontrino(idxScontrino);
+        } else {
+          // Ho finito la lista scontrini
+          console.log('Ho finito');
+          client.end();
+          return;
         }
-        // Se sono qui ho finito la lista scontrini
-        client.end();
-        return;
       break;
     } // switch
-});
+  });
 
   client.on('end', () => {
     if (msgErrore > '') {
@@ -185,7 +190,5 @@ function emettiScontrini(server, lista, evt) {
   });
 
 }
-
-
 
 module.exports.emettiScontrini = emettiScontrini;
