@@ -1,4 +1,5 @@
 const net = require('net');
+
 const sSTX = '\x02';
 const nSTX = 2;
 const sETX = '\x03';
@@ -47,7 +48,10 @@ const server = net.createServer((socket) => {
       case '1109':
         response += '00000';
         break;
-    }
+      case '1008':
+        response += 'EV96123456';
+        break;
+      }
     dataBuff = Buffer.alloc(0);
     response = sACK+sSTX+response+faiCKS(response)+sETX;
     socket.write(response);
@@ -56,6 +60,6 @@ const server = net.createServer((socket) => {
 server.on('error', (err) => {
   console.log(err) ;
 });
-server.listen(3500, () => {
+server.listen(9100, () => {
   console.log('server in ascolto su ', server.address().port);
 });

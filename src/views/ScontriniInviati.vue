@@ -102,6 +102,7 @@ export default {
     },
     reload() {
       this.rows = [];
+      this.selected = [];
       this.getPosts();
     },
 

@@ -1,4 +1,8 @@
 const net = require('net');
+const axios = require('axios');
+axios.defaults.baseURL = process.env.VUE_APP_URL_SCONTRINI;
+axios.defaults.headers.common['Authorization'] = 'Basic ' + Buffer.from(process.env.VUE_APP_MY_ACCOUNT).toString('base64');
+
 //const util = require('util');
 
 const sSTX = '\x02';
@@ -97,15 +101,37 @@ function emettiScontrini(server, lista, evt) {
 
   function inviaScontrino(idx) {
     let descr = (listaScontrini[idx].testo).substr(0,22);
-    let ll = (descr.length).toString().padStart(2,'0');
+    let txt = '';
+
+    for (let i = 0, l=descr.length; i < l; i++) {
+      if(descr.charCodeAt(i) > 127) {
+        txt +='?';
+      } else {
+        txt += descr[i];
+      }
+    }
+
+    let ll = (txt.length).toString().padStart(2,'0');
     let price = Math.round(listaScontrini[idx].prezzo * 100).toString().padStart(9,'0');
-    let str = '30011' + ll + descr + price;
+    let str = '30011' + ll + txt + price;
     sendCassa(str);
   }
 
   function  aggiornaScontrino(idx,txt) {
-    console.log('Aggiorno scontrino ' + idx + ',' + txt);
-    return true;
+    axios.post('scontriniStampati',{id: listaScontrini[idx].id, id_scontrino: txt})
+        .then(res => {
+          if(++idxScontrino < listaScontrini.length) {
+            inviaScontrino(idxScontrino);
+          } else {
+            // Ho finito la lista scontrini
+            client.end();
+          }
+        })
+        .catch(err => {
+            let txtErr = err.response.data.error ? ': ' + err.response.data.error : '';
+            msgErrore = 'KO Errore in aggiornamento scontrino\r\n' + err.message + txtErr;
+            client.end();
+        });
   } 
 
   client.on('data', (buffer) =>{
@@ -114,11 +140,7 @@ function emettiScontrini(server, lista, evt) {
       client.end(sACK);
       return;
     }
-    for (let i = 0; i < buffer.length; i++) {
-      if(buffer[i] > 128) {
-        buffer[i] = 63; // metto '?'
-      }
-    }
+
     dataBuff = Buffer.concat([dataBuff, buffer]);
     if(dataBuff[dataBuff.length -1] != nETX ) {
       // aspetto altri dati.. (mettere un timer...)
@@ -132,13 +154,12 @@ function emettiScontrini(server, lista, evt) {
       return;
     }
     if(txt.substr(0,3) == 'ERR' || txt.substr(4,3) == 'ERR') {
-        msgErrore = 'KO ricevuto errore da XCUBE: ' + txt;
+        msgErrore = 'KO Ricevuto errore da XCUBE: \r\n' + txt;
         client.end();
         return;
     }
 
     // Analisi del messagio tornato dalla stampante e conseguente azione successiva
-    console.log('Rx=[' + txt + ']');
     switch (txt.substr(0,4)) {
       case '1109': // check Stampante
         if (!isPrinterOK(txt.substr(4))) {
@@ -164,20 +185,8 @@ function emettiScontrini(server, lista, evt) {
       case '1001': // data ora
 */
       case '1008': // lettura id_fiscale dello scontino
-        if(!aggiornaScontrino(idxScontrino,txt.substr(6,8))) {
-          msgErrore = 'KO Errore in aggiornamento scontrino :' + txt.substr(6,8);
-          client.end();
-          return;
-        }
-        if(++idxScontrino < listaScontrini.length) {
-          inviaScontrino(idxScontrino);
-        } else {
-          // Ho finito la lista scontrini
-          console.log('Ho finito');
-          client.end();
-          return;
-        }
-      break;
+        aggiornaScontrino(idxScontrino,txt.substr(6,8));
+        break;
     } // switch
   });
 

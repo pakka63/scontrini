@@ -51,6 +51,8 @@
 //import HelloWorld from '@/components/HelloWorld.vue'
 import axios from 'axios';
 import { nuovi } from '@/store.js';
+import { remote } from 'electron';
+const {dialog} = remote;
 
 function isElectron() {
   return (typeof process !== "undefined") && process.versions && (process.versions.electron !== undefined);
@@ -107,7 +109,9 @@ export default {
             this.rows = nuovi.scontrini = res.data;
             this.loading=false;
           })
-          .catch(error => console.log(error))
+          .catch(error => {
+            dialog.showErrorBox('Errore in lettura', error);
+          })
       } else {
         this.itemsPerPage = nuovi.itemsPerPage;
         this.page = nuovi.currentPage;
@@ -130,9 +134,13 @@ export default {
     },
     reload() {
       this.rows = [];
+      this.selected = [];
+      this.btnStampaDisabled=true;
+
       this.getPosts();
     },
     stampaScontrini() {
+      this.$emit("show-spinner", true);
       ipcRenderer.send('stampaScontrini', this.selected);
     }
   },
@@ -140,7 +148,12 @@ export default {
   created() {
     this.getPosts();
     if(isElectron()) {
-      ipcRenderer.on('esitoStampa', (/* event, arg */) => {
+      ipcRenderer.on('esitoStampa', (event, msg ) => {
+        if(msg.substr(0,2) == 'KO') {
+          const { dialog } = require('electron').remote
+          dialog.showErrorBox('Errore in stampa Scontrini', msg.substr(3));
+        }
+        this.$emit("show-spinner", false);
         this.reload();
       });
     }

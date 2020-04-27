@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app >
     <v-app-bar
       app
       color="primary"
@@ -19,17 +19,21 @@
 
     <v-content>
       <transition name="slide-appear" mode="out-in">
-        <router-view/>
+        <!-- Definisco un "custom event" per pilotare lo spinner dalla view-->
+        <router-view @show-spinner="showSpinner"/>
       </transition>
     </v-content>
     <v-footer padless >
-    <v-col
-      class="text-center"
-      cols="12"
-    >
-      {{ new Date().getFullYear() }} — <strong>EDP Progetti S.r.l.</strong>
-    </v-col>
-  </v-footer>
+      <v-col
+        class="text-center"
+        cols="12"
+      >
+        {{ new Date().getFullYear() }} — <strong>EDP Progetti S.r.l.</strong>
+      </v-col>
+    </v-footer>
+    <v-overlay :value="overlay">
+        <v-progress-circular indeterminate size="64"></v-progress-circular>
+    </v-overlay>
   </v-app>
 </template>
 
@@ -37,9 +41,15 @@
 export default {
   name: 'App',
   data: () => ({
+    overlay: false,
     title: process.env.VUE_APP_TITLE
     //
   }),
+  methods: {
+    showSpinner(value) {
+      this.overlay=value;
+    }
+  }
 };
 </script>
 

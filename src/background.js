@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, ipcMain } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain, dialog } from 'electron'
 import {
   createProtocol,
 //  installVueDevtools
@@ -11,13 +11,12 @@ const path = require('path')
 const stampaSc = require('@/utils/stampaScontrini')
 
 const confFile = process.cwd() + path.sep +'config.json'
-console.log(confFile)
 try {
     if (!fs.existsSync(confFile)) {
       const content = 
       `{
         "server" : {
-          "address" : "10.197.154.208",
+          "address" : "192.168.1.133",
           "port" : 9100
         }
       }`;
@@ -26,7 +25,7 @@ try {
     }
     var config = JSON.parse(fs.readFileSync(confFile, 'utf8'));
 } catch(err) {
-    console.log('ERRORE in lettura di "' + confFile + '":' + "\n     " + err);
+    dialog.showErrorBox('Errore', 'ERRORE in lettura di "' + confFile + '":' + "\n     " + err);
     process.exit(1);
 } 
 
@@ -70,7 +69,6 @@ function createWindow () {
 //===================================================================================
 
 ipcMain.on('stampaScontrini', (event, arg) => {
-  console.log(arg)
   let scontrini = arg.map( a => {
     return {
       id: a['id'],
