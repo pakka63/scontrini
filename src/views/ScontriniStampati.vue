@@ -31,7 +31,7 @@
         <template #item.errore="{ value }"><span class="red--text darken-3">{{ value }}</span></template>
         <template #footer>
           <div style="height:0">
-            <v-btn :disabled="btnDisabled" class="pa-3 ml-5 mt-3 primary">Invia a SAP</v-btn>
+            <v-btn :disabled="btnInvioDisabled" class="pa-3 ml-5 mt-3 primary" @click="inviaScontrini">Invia a SAP</v-btn>
             <v-tooltip bottom>
               <template v-slot:activator="{ on }">
                   <v-btn class="mt-3 ml-5" outlined v-on="on" color="primary" @click="reload">
@@ -49,6 +49,20 @@
 <script>
 import axios from 'axios';
 import { stampati } from '@/store.js';
+/*
+  import { remote } from 'electron';
+  const {dialog} = remote;
+*/
+function isElectron() {
+  return (typeof process !== "undefined") && process.versions && (process.versions.electron !== undefined);
+}
+
+let showError = function (...args) { alert(args.join('\n'))};
+if(isElectron()) {
+  const electron = require('electron');
+  const dialog = electron.remote.dialog;
+  showError = dialog.showErrorBox;
+}
 
 export default {
   name: 'ScontriniStampati',
@@ -57,7 +71,7 @@ export default {
       loading: true,
       rows: stampati.scontrini,
       selected: [],
-      btnDisabled: true,
+      btnInvioDisabled: true,
       itemsPerPage: stampati.itemsPerPage,
       page: stampati.currentPage,
     }
@@ -94,7 +108,7 @@ export default {
             this.rows = stampati.scontrini=res.data;
             this.loading=false;
           })
-          .catch(error => console.log(error))
+          .catch(error => showError('Errore in lettura', error.message))
       } else {
         this.itemsPerPage = stampati.itemsPerPage;
         this.page = stampati.currentPage;
@@ -102,14 +116,14 @@ export default {
     },
     itemSelected(chk) {
       if(chk.value) {
-        this.btnDisabled = false;
+        this.btnInvioDisabled = false;
       } else {
         // é stato disattivato il checkbox, se non ci sono altre row, disattivo il bottone
-        this.btnDisabled = this.selected.length < 2;
+        this.btnInvioDisabled = this.selected.length < 2;
       }
     },
     itemSelectAll(chk) {
-      this.btnDisabled = !chk.value;
+      this.btnInvioDisabled = !chk.value;
     },
     checkPagination(info) {
       stampati.itemsPerPage = info.itemsPerPage;
@@ -117,8 +131,30 @@ export default {
     },
     reload() {
       this.rows = [];
+      this.selected = [];
+      this.btnInvioDisabled=true;
+      this.$emit("show-spinner", false);
+
       this.getPosts();
     },
+    inviaScontrini() {
+      this.$emit("show-spinner", true);
+
+      let lista = this.selected.map( a => {
+        return { id: a['id'] }
+      });
+
+      axios.post('inviaScontrini', { tickets: lista })
+        .then(res => {
+          console.log(res);
+          this.reload();
+        })
+        .catch(err => {
+            showError('Errore in lettura: ', err.message + '\n' + err.response.data.error);
+            this.reload();
+        });
+    }
+
   },
 
   created() {

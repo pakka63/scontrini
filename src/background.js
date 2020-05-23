@@ -9,6 +9,7 @@ import {
 const fs = require('fs')
 const path = require('path')
 const stampaSc = require('@/utils/stampaScontrini')
+const inviaSc  = require('@/utils/inviaScontrini')
 
 const confFile = process.cwd() + path.sep +'config.json'
 try {
@@ -67,7 +68,7 @@ function createWindow () {
 }
 
 //===================================================================================
-
+//Esegue la stampa degli scontrini e poi manda al server (Laravel) la lista di scontrini stampati
 ipcMain.on('stampaScontrini', (event, arg) => {
   let scontrini = arg.map( a => {
     return {
@@ -79,7 +80,6 @@ ipcMain.on('stampaScontrini', (event, arg) => {
   })
   stampaSc.emettiScontrini(config.server, scontrini, event)
 })
-
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {

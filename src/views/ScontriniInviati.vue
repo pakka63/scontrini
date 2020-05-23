@@ -27,8 +27,8 @@
           <div style="height:0">
             <v-tooltip bottom>
               <template v-slot:activator="{ on }">
-                  <v-btn class="mt-3 ml-5" outlined v-on="on" color="primary" @click="reload">
-                    <v-icon>mdi-refresh</v-icon>
+                <v-btn class="mt-3 ml-5" outlined v-on="on" color="primary" @click="reload">
+                  <v-icon>mdi-refresh</v-icon>
                 </v-btn>
               </template>
               <span>Rileggi i dati</span>
