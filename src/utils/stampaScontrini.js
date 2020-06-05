@@ -17,6 +17,7 @@ const nNAK = 21;
 
 function emettiScontrini(server, lista, evt) {
   let dataBuff = Buffer.alloc(0);
+  let idStampante = '';
   let counter = -1;
   let msgErrore = '';
   let idxScontrino; // stato comunicazione con la cassa: -1 info, 0-n emisione scontrino.
@@ -99,6 +100,7 @@ function emettiScontrini(server, lista, evt) {
     return true;
   }
 
+  //Invio i dati dello scontrino alla stampante
   function inviaScontrino(idx) {
     let descr = (listaScontrini[idx].testo).substr(0,22);
     let txt = '';
@@ -117,21 +119,37 @@ function emettiScontrini(server, lista, evt) {
     sendCassa(str);
   }
 
-  function  aggiornaScontrino(idx,txt) {
-    axios.post('scontriniStampati',{id: listaScontrini[idx].id, id_scontrino: txt})
-        .then(res => {
-          if(++idxScontrino < listaScontrini.length) {
-            inviaScontrino(idxScontrino);
-          } else {
-            // Ho finito la lista scontrini
-            client.end();
+  //Invia lo scontrino appena stampato al server laravel
+  function  aggiornaScontrino(idx) {
+    axios.post('scontriniStampati',{id: listaScontrini[idx].id, id_scontrino:listaScontrini[idx].id_scontrino, id_printer: idStampante})
+      .then(res => {
+        if(++idxScontrino < listaScontrini.length) {
+          // Invio in stampa il prossimo scontrino
+          inviaScontrino(idxScontrino);
+        } else {
+          // Ho finito la lista scontrini, adesso segnalo a Laravel 
+          // di contattare SAP per l'invio di quelli appena stampati.
+          let lista = listaScontrini.map( ticket => {
+            return {
+              id: ticket['id'],
+            }
+          })
+          axios.post('inviaScontrini',{ tickets: lista, afterPrint: true }) // afterPrint=true => scrive l'errore nel db e non lo segnala
+            .then(res => {
+              client.end();
+            })
+            .catch(err => {
+              let txtErr = err.response.data.error ? ': ' + err.response.data.error : '';
+              msgErrore = 'KO Errore in aggiornamento scontrino\r\n' + err.message + txtErr;
+              client.end();
+            });
           }
-        })
-        .catch(err => {
-            let txtErr = err.response.data.error ? ': ' + err.response.data.error : '';
-            msgErrore = 'KO Errore in aggiornamento scontrino\r\n' + err.message + txtErr;
-            client.end();
-        });
+      })
+      .catch(err => {
+          let txtErr = err.response.data.error ? ': ' + err.response.data.error : '';
+          msgErrore = 'KO Errore in aggiornamento scontrino\r\n' + err.message + txtErr;
+          client.end();
+      });
   } 
 
   client.on('data', (buffer) =>{
@@ -177,15 +195,24 @@ function emettiScontrini(server, lista, evt) {
         sendCassa('3013');
         break;
       case '3013': // Espulsione e taglio scontrino
+        sendCassa('1003');
+        break;
+      case '1003': // ricezione numero e totale scontrino
+        listaScontrini[idxScontrino].id_scontrino = txt.substr(60,4);
         sendCassa('1008');
         break;
+
 /*        Non si inviano....
-      case '1003': // ricezione totale scontrino
-      case '1013': // lettura modello stampante
       case '1001': // data ora
 */
-      case '1008': // lettura id_fiscale dello scontino
-        aggiornaScontrino(idxScontrino,txt.substr(6,8));
+      case '1008': // lettura id_fiscale della stampante
+        idStampante = txt.substr(4,10);
+        sendCassa('1013');
+        break;
+      case '1013': // lettura modello stampante
+        idStampante +=  txt.substr(4).trim();
+        aggiornaScontrino(idxScontrino);
+        idStampante = '';
         break;
     } // switch
   });

@@ -69,13 +69,13 @@ function createWindow () {
 
 //===================================================================================
 //Esegue la stampa degli scontrini e poi manda al server (Laravel) la lista di scontrini stampati
-ipcMain.on('stampaScontrini', (event, arg) => {
-  let scontrini = arg.map( a => {
+ipcMain.on('stampaScontrini', (event, lista) => {
+  let scontrini = lista.map( ticket => {
     return {
-      id: a['id'],
-      testo: a['testo'],
-      id_documento: a['id_documento'],
-      prezzo: a['prezzo']
+      id: ticket['id'],
+      testo: ticket['testo'],
+      id_documento: ticket['id_documento'],
+      prezzo: ticket['prezzo']
     }
   })
   stampaSc.emettiScontrini(config.server, scontrini, event)

@@ -4,6 +4,9 @@ axios.defaults.headers.common['Authorization'] = 'Basic ' + Buffer.from(process.
 
 
 
+/*
+** manda al server (Laravel) la lista di scontrini da inviare al server SAP
+*/
 function inviaScontrini(lista, evt) {
   let dataBuff = Buffer.alloc(0);
   let counter = -1;

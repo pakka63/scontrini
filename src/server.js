@@ -1,3 +1,10 @@
+
+/**
+ * Per il lancio:
+ * cd src
+ * node server.js
+ * 
+ */
 const net = require('net');
 
 const sSTX = '\x02';
@@ -20,6 +27,8 @@ function faiCKS(str) {
 
 const server = net.createServer((socket) => {
   let closing = false;
+  let nrScontrino = 1000; // <-- simula progressivo scontrino
+
   // 'connection' listener.
   console.log('client connected from ' + socket.remoteAddress + ':' + socket.remotePort);
   socket.on('end', () => {
@@ -48,10 +57,17 @@ const server = net.createServer((socket) => {
       case '1109':
         response += '00000';
         break;
+      case '1003':
+        ++nrScontrino;
+        response += '000000000000000000000000000000000000+000000000+000000000' + nrScontrino + '0';
+        break;
       case '1008':
         response += 'EV96123456';
         break;
-      }
+      case '1013':
+        response += 'Emu Printer Test. Rev 0.1';
+        break;
+    }
     dataBuff = Buffer.alloc(0);
     response = sACK+sSTX+response+faiCKS(response)+sETX;
     socket.write(response);
