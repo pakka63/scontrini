@@ -8,7 +8,7 @@
       <div class="d-flex align-center">
         <v-toolbar-title class="display-1">
         <v-icon class="mr-2" x-large>mdi-cash-register</v-icon>
-          {{ title }}</v-toolbar-title>
+          {{ title + (inTest ? ' (Test mode)': '')}}</v-toolbar-title>
       </div>
 
       <v-spacer></v-spacer>
@@ -20,7 +20,7 @@
     <v-content>
       <transition name="slide-appear" mode="out-in">
         <!-- Definisco un "custom event" per pilotare lo spinner dalla view-->
-        <router-view @show-spinner="showSpinner"/>
+        <router-view @show-spinner="showSpinner" :test="inTest"/>
       </transition>
     </v-content>
     <v-footer padless >
@@ -42,13 +42,19 @@ export default {
   name: 'App',
   data: () => ({
     overlay: false,
-    title: process.env.VUE_APP_TITLE
+    title: process.env.VUE_APP_TITLE,
+    inTest: true
     //
   }),
   methods: {
     showSpinner(value) {
       this.overlay=value;
-    }
+    },
+  },
+  created() {
+    let uri = window.location.search.substring(1); 
+    let params = new URLSearchParams(uri);
+    this.inTest = (params.get("test") === '1');
   }
 };
 </script>

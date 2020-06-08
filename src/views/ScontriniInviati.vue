@@ -59,7 +59,7 @@ export default {
       page: inviati.currentPage,
     }
   },
-
+  props: ['test'],
   computed : {
     headers() {
       return [
@@ -85,7 +85,7 @@ export default {
     getPosts() {
       this.loading = (this.rows.length == 0);
       if(this.rows.length == 0) {
-        axios.get('scontriniInviati')
+        axios.get('scontriniInviati'+(this.test? '?test=1':''))
           .then(res => {
             this.rows = inviati.scontrini=res.data;
             this.loading=false;

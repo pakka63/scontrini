@@ -81,7 +81,7 @@ export default {
       page: nuovi.currentPage,
     }
   },
-
+  props: ['test'],
   computed : {
     btnDisabled() {
       return  !isElectron() || this.btnStampaDisabled;
@@ -109,7 +109,7 @@ export default {
     getPosts() {
       this.loading = (this.rows.length == 0);
       if(this.rows.length == 0) {
-        axios.get('scontriniNuovi')
+        axios.get('scontriniNuovi'+(this.test? '?test=1':''))
           .then(res => {
             this.rows = nuovi.scontrini = res.data;
             this.loading=false;

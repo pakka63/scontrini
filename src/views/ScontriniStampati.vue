@@ -76,7 +76,7 @@ export default {
       page: stampati.currentPage,
     }
   },
-
+  props: ['test'],
   computed : {
     headers() {
       return [
@@ -103,7 +103,7 @@ export default {
     getPosts() {
       this.loading = (this.rows.length == 0);
       if(this.rows.length == 0) {
-        axios.get('scontriniStampati')
+        axios.get('scontriniStampati'+(this.test? '?test=1':''))
           .then(res => {
             this.rows = stampati.scontrini=res.data;
             this.loading=false;

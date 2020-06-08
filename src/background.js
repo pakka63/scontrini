@@ -6,12 +6,11 @@ import {
 //  installVueDevtools
 } from 'vue-cli-plugin-electron-builder/lib'
 
-const fs = require('fs')
-const path = require('path')
-const stampaSc = require('@/utils/stampaScontrini')
-const inviaSc  = require('@/utils/inviaScontrini')
+const fs = require('fs');
+const path = require('path');
+const stampaSc = require('@/utils/stampaScontrini');
 
-const confFile = process.cwd() + path.sep +'config.json'
+const confFile = process.cwd() + path.sep +'config.json';
 try {
     if (!fs.existsSync(confFile)) {
       const content = 
@@ -19,7 +18,8 @@ try {
         "server" : {
           "address" : "192.168.1.133",
           "port" : 9100
-        }
+        },
+        "in_test" : true
       }`;
       const data = fs.writeFileSync(confFile, content)
       //file written successfully
@@ -53,13 +53,13 @@ function createWindow () {
   win.removeMenu()
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
-    // Load the url of the dev server if in development mode
-    win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
+    // Load the url of the dev server if in development mode (http://localhost:8080/)
+    win.loadURL(process.env.WEBPACK_DEV_SERVER_URL + (config.in_test ? '?test=1': ''))
     if (!process.env.IS_TEST) win.webContents.openDevTools()
   } else {
     createProtocol('app')
     // Load the index.html when not in development
-    win.loadURL('app://./index.html')
+    win.loadURL('app://./index.html' + (config.in_test ? '?test=1': ''))
   }
 
   win.on('closed', () => {
