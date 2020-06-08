@@ -48,7 +48,7 @@
 
 <script>
 import axios from 'axios';
-import { stampati } from '@/store.js';
+import { stampati, inviati } from '@/store.js';
 /*
   import { remote } from 'electron';
   const {dialog} = remote;
@@ -106,6 +106,7 @@ export default {
         axios.get('scontriniStampati'+(this.test? '?test=1':''))
           .then(res => {
             this.rows = stampati.scontrini=res.data;
+            inviati.scontrini=[];
             this.loading=false;
           })
           .catch(error => showError('Errore in lettura', error.message))

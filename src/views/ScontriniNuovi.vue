@@ -50,7 +50,7 @@
 // @ is an alias to /src
 //import HelloWorld from '@/components/HelloWorld.vue'
 import axios from 'axios';
-import { nuovi } from '@/store.js';
+import { nuovi, stampati } from '@/store.js';
 /*
  import { remote } from 'electron';
 const {dialog} = remote;
@@ -112,6 +112,7 @@ export default {
         axios.get('scontriniNuovi'+(this.test? '?test=1':''))
           .then(res => {
             this.rows = nuovi.scontrini = res.data;
+            stampati.scontrini=[];
             this.loading=false;
           })
           .catch(error => {
