@@ -23,6 +23,15 @@
         <template #item.prezzo="{ value }">{{ value | toEuro }}</template>
         <template #item.created_at="{ value }">{{ value | toGMA }}</template>
         <template #item.errore="{ value }"><span class="red--text darken-3">{{ value }}</span></template>
+        <template #item.actions="{ item }">
+          <v-icon
+            small
+            @click="deleteItem(item)"
+          >
+            mdi-delete
+          </v-icon>
+        </template>
+
         <template #no-data>
           <v-alert 
             class="font-weight-regular"
@@ -30,6 +39,7 @@
           >Nessun Dato disponibile
         </v-alert>
         </template>
+
         <template #footer>
           <div style="height:0"><v-btn :disabled="btnDisabled" class="pa-3 ml-5 mt-3 primary" @click="stampaScontrini">Stampa Scontrini</v-btn>
             <v-tooltip bottom>
@@ -42,6 +52,7 @@
             </v-tooltip>
           </div>
         </template>
+
       </v-data-table>
     </div>
 </template>
@@ -93,6 +104,7 @@ export default {
         { text: 'Prezzo €', value: 'prezzo', align: 'end'},
         { text: 'Ricevuto', value: 'created_at', align : 'center'},
         { text: 'Anomalie', value: 'errore'},
+        { text: 'Elimina', value: 'actions', sortable: false },
       ]
     },
     footerProps() {
@@ -115,12 +127,31 @@ export default {
             stampati.scontrini=[];
             this.loading=false;
           })
-          .catch(error => {
+          .catch((error) => {
             showError('Errore in lettura', error.toString());
           })
       } else {
         this.itemsPerPage = nuovi.itemsPerPage;
         this.page = nuovi.currentPage;
+      }
+    },
+    deleteItem (item) {
+      console.log(item.id);
+      let index = this.rows.findIndex(row => row.id == item.id);
+      if(index >= 0) {
+        if(confirm('Sicuro di voler eliminare lo scontrino ' + item.id_documento + ' (' + this.$filters.toEuro(item.prezzo) +') ?')) {
+          this.$emit("show-spinner", true);
+          axios.delete('scontriniNuovi'+(this.test? '?test=1':''), { data: { id: item.id } })
+            .then( () => {
+              this.rows.splice(index, 1);
+            })
+            .catch((error) => {
+              showError('Errore in cancellazione', error.toString());
+            })
+            .finally( () => {
+              this.$emit("show-spinner", false);
+            });
+          }
       }
     },
     itemSelected(chk) {

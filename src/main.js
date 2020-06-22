@@ -20,6 +20,8 @@ Vue.filter('toEuro', function(value)  {
     let val = (value/1).toFixed(2).replace('.', ',');
     return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   });
+// Per avere la possibilità di usare i filtri da codice JS, es: this.$filters.toEuro(val) (invece di this.$options.filters.toEuro(..))
+Vue.prototype.$filters = Vue.options.filters;
 
 new Vue({
   router,

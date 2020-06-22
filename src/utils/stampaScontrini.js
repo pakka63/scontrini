@@ -135,6 +135,8 @@ function emettiScontrini(server, lista, evt) {
             }
           })
           axios.post('inviaScontrini',{ tickets: lista, afterPrint: true }) // afterPrint=true => scrive l'errore nel db e non lo segnala
+          client.end();
+/*
             .then(res => {
               client.end();
             })
@@ -143,6 +145,7 @@ function emettiScontrini(server, lista, evt) {
               msgErrore = 'KO Errore in aggiornamento scontrino\r\n' + err.message + txtErr;
               client.end();
             });
+            */
           }
       })
       .catch(err => {

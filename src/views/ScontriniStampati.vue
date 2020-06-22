@@ -151,7 +151,7 @@ export default {
           this.reload();
         })
         .catch(err => {
-            showError('Errore in lettura: ', err.message + '\n' + err.response.data.error);
+            showError('Errore in lettura: ', err.message + '\n' + ( err.response.data.error ?? '') );
             this.reload();
         });
     }
