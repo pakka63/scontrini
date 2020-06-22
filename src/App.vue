@@ -28,7 +28,7 @@
         class="text-center"
         cols="12"
       >
-        {{ new Date().getFullYear() }} — <strong>EDP Progetti S.r.l.</strong>
+        {{ new Date().getFullYear() }} — <strong>EDP Progetti S.r.l.</strong> - <small>{{version}}</small>
       </v-col>
     </v-footer>
     <v-overlay :value="overlay">
@@ -43,6 +43,7 @@ export default {
   data: () => ({
     overlay: false,
     title: process.env.VUE_APP_TITLE,
+    version: process.env.VUE_APP_VERSION,
     inTest: true
     //
   }),
