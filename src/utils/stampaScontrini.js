@@ -202,9 +202,16 @@ function emettiScontrini(server, lista, evt) {
         break;
       case '1003': // ricezione numero e totale scontrino
         listaScontrini[idxScontrino].id_scontrino = txt.substr(60,4);
+        sendCassa('1104');
+        break;
+      case '1104': // ricezione numero chiusura precedente
+        let chiusura = parseInt(txt.substr(4,4),10) + 1;
+        chiusura = '0000' + chiusura;
+        chiusura = chiusura.substr(chiusura.length -4,4);
+        listaScontrini[idxScontrino].id_scontrino = chiusura + '-' + listaScontrini[idxScontrino].id_scontrino;
         sendCassa('1008');
         break;
-
+        
 /*        Non si inviano....
       case '1001': // data ora
 */

@@ -1,3 +1,7 @@
+/*
+compilare con pkg -t x86 checkXcube2.js
+o con pkg -t windows checkXcube2.js
+*/
 const net = require('net');
 
 const sSTX = '\x02';
@@ -40,7 +44,7 @@ console.log('Mi collego con ' + server[0] + ':' +server[1] + ' ....');
 const client = net.createConnection(server[1], server[0], () => {
   // Check Stato Cassa
   console.log('Connesso!');
-  sendCassa('1109');
+  sendCassa('1104');
 });
 
 client.on('end', () => {
