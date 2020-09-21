@@ -1,4 +1,5 @@
 # scontrini
+c.f.r.: https://medium.com/@bromix/electron-application-with-vue-js-and-vuetify-f2a1f9c749b8
 
 ## Project setup
 ```
@@ -6,6 +7,7 @@ npm install
 ```
 
 ### Compiles and hot-reloads for development
+Per la modalità test apri il browser su: http://localhost:8080/?test=1
 ```
 npm run serve
 ```

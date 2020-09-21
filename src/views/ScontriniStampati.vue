@@ -20,7 +20,6 @@
         @item-selected="itemSelected"
         @toggle-select-all="itemSelectAll"
         @pagination="checkPagination"
-
       >
         <template #no-data>
           <v-alert class="font-weight-regular" :value="true" color="blue-grey" dark dense >Nessun Dato disponibile</v-alert>
@@ -124,7 +123,7 @@ export default {
       }
     },
     itemSelectAll(chk) {
-      this.btnInvioDisabled = !chk.value;
+      this.btnInvioDisabled = !(chk.value && this.rows.length);
     },
     checkPagination(info) {
       stampati.itemsPerPage = info.itemsPerPage;

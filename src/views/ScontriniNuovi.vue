@@ -162,8 +162,23 @@ export default {
         this.btnStampaDisabled = this.selected.length < 2;
       }
     },
+    // itemSelectAll(chk) {
+    //   this.btnStampaDisabled = !chk.value;
+    // },
     itemSelectAll(chk) {
-      this.btnStampaDisabled = !chk.value;
+      // Se la riga ha un'anomalia.. non la tocco.
+      if(chk.value) {
+        setTimeout(() => {
+          this.selected  = this.selected.filter((item) => {
+            //Torna i soli elementi senza errore
+            return item.errore == null;
+          });
+          this.btnStampaDisabled = this.selected.length == 0;
+        }, 0);
+      } else {
+        this.btnStampaDisabled = true;
+      }
+
     },
     checkPagination(info) {
       nuovi.itemsPerPage = info.itemsPerPage;
