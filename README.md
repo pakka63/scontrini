@@ -30,6 +30,12 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 npm run electron:serve
 ```
 
+### Compiles and prepare the exe installer for production
+```
+npm run electron:build
+
+npm run electron:build32
+```
 ### Lancio simulatore stampante
 ```
 cd src

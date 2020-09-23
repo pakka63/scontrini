@@ -171,7 +171,7 @@ export default {
         setTimeout(() => {
           this.selected  = this.selected.filter((item) => {
             //Torna i soli elementi senza errore
-            return item.errore == null;
+            return !item.errore;
           });
           this.btnStampaDisabled = this.selected.length == 0;
         }, 0);
