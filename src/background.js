@@ -8,19 +8,24 @@ import {
 
 const fs = require('fs');
 const path = require('path');
-const stampaSc = require('@/utils/stampaScontrini');
+//const stampaSc = require('@/utils/stampaScontrini');
+const scriviSc = require('@/utils/scriviScontrini');
 
 const confFile = process.cwd() + path.sep +'config.json';
 try {
     if (!fs.existsSync(confFile)) {
       const content = 
-      `{
-        "server" : {
-          "address" : "192.168.1.133",
-          "port" : 9100
-        },
-        "in_test" : true
-      }`;
+`{
+  "fpMate" : {
+    "id_printer" : "Epson FP81II RT 99IEB095401",
+    "cartella_scontrini" : "C:\\\\tmp\\\\EPSON",
+    "cartella_esiti_scontrini" : "C:\\\\tmp\\\\EPSON\\\\out",
+    "nome_scontrino" : "sco_",
+    "estensione_scontrino" : ".txt",
+    "estensione_monitor" : ".Out"
+  }, 
+  "in_test" : true
+}`;
       const data = fs.writeFileSync(confFile, content)
       //file written successfully
     }
@@ -67,9 +72,9 @@ function createWindow () {
   })
 }
 
-//===================================================================================
+/*===================================================================================
 //Esegue la stampa degli scontrini e poi manda al server (Laravel) la lista di scontrini stampati
-ipcMain.on('stampaScontrini', (event, lista) => {
+ipcMain.on('OLD_stampaScontrini', (event, lista) => {
   let scontrini = lista.map( ticket => {
     return {
       id: ticket['id'],
@@ -79,6 +84,21 @@ ipcMain.on('stampaScontrini', (event, lista) => {
     }
   })
   stampaSc.emettiScontrini(config.server, scontrini, event)
+})
+*/
+
+//===================================================================================
+//Esegue la scrittura degli scontrini nella cartella gestita da FpMate e poi manda al server (Laravel) la lista di scontrini stampati
+ipcMain.on('stampaScontrini', (event, lista) => {
+  let scontrini = lista.map( ticket => {
+    return {
+      id: ticket['id'],
+      testo: ticket['testo'],
+      id_documento: ticket['id_documento'],
+      prezzo: ticket['prezzo']
+    }
+  })
+  scriviSc.emettiScontrini(config, scontrini, event)
 })
 
 // Quit when all windows are closed.

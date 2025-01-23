@@ -7,7 +7,8 @@ npm install
 ```
 
 ### Compiles and hot-reloads for development
-Per la modalità test apri il browser su: http://localhost:8080/?test=1
+Per la modalità test apri il browser su: http://localhost:8080/?test=1 o http://192.168.19.142:8080/?test=1
+dopo che hai eseguito il npm run serve
 ```
 npm run serve
 ```

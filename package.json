@@ -1,9 +1,9 @@
 {
-  "name": "scontrini",
-  "version": "1.0.0",
+  "name": "scontriniE",
+  "version": "1.0.0e",
   "private": true,
   "author": "Pakka 4 EDP Progetti",
-  "description": "Invia dati alla stampante  scontrini fiscali",
+  "description": "Invia dati alla stampante EPSON scontrini fiscali",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",

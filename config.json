@@ -1,7 +1,15 @@
 {
   "server" : {
-    "address" : "localhost",
-    "port" : 9100
+    "## address" : "192.168.1.134",
+    "## port"    : 9100
   },
-  "in_test" : true
+  "fpMate" : {
+    "id_stampante"             : "Epson FP81II RT 99IEB095401",
+    "cartella_scontrini"       : "C:\\tmp\\EPSON",
+    "cartella_esiti_scontrini" : "C:\\tmp\\EPSON\\out",
+    "nome_scontrino"           : "sco_",
+    "estensione_scontrino"     : ".txt",
+    "estensione_monitor"       : ".Out"
+  },
+  "in_test" : false
 }

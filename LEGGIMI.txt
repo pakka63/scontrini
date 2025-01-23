@@ -1,0 +1,12 @@
+L'applicazione SCONTRINI parte da main.js e App.vue
+
+Ha 3 videate: Scontrini Nuovi, Stampati e Inviati (Storico) a seconda dello stato: 0, 1 e 2
+npm run serve avvia l'applicazione su browser e sono disattivate le funzioni electron
+lanciare l'url http://localhost:8080/?test=1 se si vuole un filtro sul campo della tabella SCONTRINI in_prova = 1
+nel file .env indicare l'url delle api servite dall'app laravel
+L'url laravel http://192.168.1.100/keeper/index.php/api/xcube/<metodo_controller> viene servita da apache su macchina HOST e non apache su macchina VM virtuale
+
+Run con Eletron:
+npm run electron:serve
+viene letto il file config.json per conoscere l'ip della stampante e il valore di in_test per sapere se
+attivare il filtro sul campo della tabella SCONTRINI in_prova = 1

@@ -14,7 +14,13 @@ const nACK = 6;
 const sNAK = '\x15';
 const nNAK = 21;
 
-
+/*
+Invia la lista scontrini alla stampante iniziando con sendCassa('1109').
+l'evento "on data" pilota successivamente la comunicazione a seconda delle risposte ricevute.
+Alla fine di ogni stampa scontrino viene chiamato l'aggiornamento su laravel (aggiornaScontrino) per marcarlo come stampanto
+e si continua con la stampa dello scontrino successivo (inviaScontrino)
+Quando la lista di scontrini risulta tutta stampata si esegue la POST a inviaScontrini per passare a SAP la lista degli scontrini stampati
+*/
 function emettiScontrini(server, lista, evt) {
   let dataBuff = Buffer.alloc(0);
   let idStampante = '';
